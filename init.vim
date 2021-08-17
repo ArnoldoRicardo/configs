@@ -67,7 +67,8 @@ Plug 'editorconfig/editorconfig-vim'
 Plug 'junegunn/fzf'
 Plug 'junegunn/fzf.vim'
 Plug 'mg979/vim-visual-multi', {'branch': 'master'}
-""*****************************************************************************
+
+"*****************************************************************************
 "" Custom bundles
 "*****************************************************************************
 
@@ -228,9 +229,7 @@ let g:NERDTreeSortOrder=['^__\.py$', '\/$', '*', '\.swp$', '\.bak$', '\~$']
 let g:NERDTreeShowBookmarks=1
 let g:nerdtree_tabs_focus_on_files=1
 let g:NERDTreeMapOpenInTabSilent = '<RightMouse>'
-let g:NERDTreeWinSize = 40
-let g:NERDTreeShowHidden=1
-
+let g:NERDTreeWinSize = 50
 set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*.pyc,*.db,*.sqlite
 " shortcuts
 nnoremap <silent> <F2> :NERDTreeFind<CR>
@@ -250,17 +249,6 @@ nnoremap <silent> <leader>sh :terminal<CR>
 command! FixWhitespace :%s/\s\+$//e
 
 "*****************************************************************************
-"" Functions
-"*****************************************************************************
-if !exists('*s:setupWrapping')
-  function s:setupWrapping()
-    set wrap
-    set wm=2
-    set textwidth=79
-  endfunction
-endif
-
-"*****************************************************************************
 "" Autocmd Rules
 "*****************************************************************************
 "" The PC is fast enough, do syntax highlight syncing from start unless 200 lines
@@ -275,6 +263,7 @@ augroup vimrc-remember-cursor-position
   autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
 augroup END
 
+"" txt
 augroup vimrc-wrapping
   autocmd!
   autocmd BufRead,BufNewFile *.txt call s:setupWrapping()
@@ -312,6 +301,10 @@ let g:UltiSnipsJumpForwardTrigger="<leader><tab>"
 let g:UltiSnipsJumpBackwardTrigger="<c-b>"
 let g:UltiSnipsEditSplit="vertical"
 
+
+" ale
+let g:ale_linters = {}
+
 " Disable visualbell
 set noerrorbells visualbell t_vb=
 if has('autocmd')
@@ -319,10 +312,10 @@ if has('autocmd')
 endif
 
 "" Buffer nav
-noremap <leader>q :bp<CR>
-noremap <leader>w :bn<CR>
-noremap <leader>z <C-w>h
-noremap <leader>x <C-w>l
+noremap <leader>z :bp<CR>
+noremap <leader>x :bn<CR>
+noremap <leader>q <C-w>h
+noremap <leader>w <C-w>l
 
 "" Close buffer
 noremap <leader>c :bd<CR>
@@ -396,18 +389,14 @@ let g:jedi#smart_auto_mappings = 0
 let g:airline#extensions#virtualenv#enabled = 1
 
 " ale
-let g:ale_linters = { 'python': ['flake8'], }
+:call extend(g:ale_linters, {
+    \'python': ['flake8'], })
+
 let g:ale_fixers = {
-  \ 'python': [
-  \     'autopep8',
-  \    'isort',
-  \ ],
-  \ 'javascript': [
-  \     'prettier',
-  \     'importjs',
-  \],
+  \   'python': [
+  \       'autopep8',
+  \   ],
   \}
-let g:ale_fix_on_save = 1
 
 " Syntax highlight
 let python_highlight_all = 1
