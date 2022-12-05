@@ -55,6 +55,7 @@ Plug 'tpope/vim-surround'
 Plug 'tpope/vim-commentary'
 Plug 'Yggdroot/indentLine'
 Plug 'ycm-core/YouCompleteMe', { 'do': './install.py' }
+Plug 'ruanyl/vim-sort-imports'
 
 " git
 Plug 'airblade/vim-gitgutter'
@@ -67,8 +68,7 @@ Plug 'editorconfig/editorconfig-vim'
 Plug 'junegunn/fzf'
 Plug 'junegunn/fzf.vim'
 Plug 'mg979/vim-visual-multi', {'branch': 'master'}
-
-"*****************************************************************************
+""*****************************************************************************
 "" Custom bundles
 "*****************************************************************************
 
@@ -85,13 +85,16 @@ Plug 'mattn/emmet-vim'
 "Plug 'pangloss/vim-javascript'
 "Plug 'elzr/vim-json'
 Plug 'sheerun/vim-polyglot'
-Plug 'prettier/vim-prettier', { 'do': 'yarn install' }
+Plug 'prettier/vim-prettier', { 'do': 'yarn add' }
 Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 
 " python
 "" Python Bundle
 Plug 'davidhalter/jedi-vim'
 Plug 'raimon49/requirements.txt.vim', {'for': 'requirements'}
+
+" dockerfile
+Plug 'ekalinin/Dockerfile.vim'
 
 call plug#end()
 
@@ -107,7 +110,7 @@ set fileencoding=utf-8
 set fileencodings=utf-8
 
 " folding
-set foldmethod=syntax
+set foldmethod=indent
 
 "" Fix backspace indent
 set backspace=indent,eol,start
@@ -229,7 +232,9 @@ let g:NERDTreeSortOrder=['^__\.py$', '\/$', '*', '\.swp$', '\.bak$', '\~$']
 let g:NERDTreeShowBookmarks=1
 let g:nerdtree_tabs_focus_on_files=1
 let g:NERDTreeMapOpenInTabSilent = '<RightMouse>'
-let g:NERDTreeWinSize = 50
+let g:NERDTreeWinSize = 40
+let g:NERDTreeShowHidden=1
+
 set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*.pyc,*.db,*.sqlite
 " shortcuts
 nnoremap <silent> <F2> :NERDTreeFind<CR>
@@ -249,6 +254,17 @@ nnoremap <silent> <leader>sh :terminal<CR>
 command! FixWhitespace :%s/\s\+$//e
 
 "*****************************************************************************
+"" Functions
+"*****************************************************************************
+if !exists('*s:setupWrapping')
+  function s:setupWrapping()
+    set wrap
+    set wm=2
+    set textwidth=79
+  endfunction
+endif
+
+"*****************************************************************************
 "" Autocmd Rules
 "*****************************************************************************
 "" The PC is fast enough, do syntax highlight syncing from start unless 200 lines
@@ -263,7 +279,6 @@ augroup vimrc-remember-cursor-position
   autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
 augroup END
 
-"" txt
 augroup vimrc-wrapping
   autocmd!
   autocmd BufRead,BufNewFile *.txt call s:setupWrapping()
@@ -301,10 +316,6 @@ let g:UltiSnipsJumpForwardTrigger="<leader><tab>"
 let g:UltiSnipsJumpBackwardTrigger="<c-b>"
 let g:UltiSnipsEditSplit="vertical"
 
-
-" ale
-let g:ale_linters = {}
-
 " Disable visualbell
 set noerrorbells visualbell t_vb=
 if has('autocmd')
@@ -312,10 +323,10 @@ if has('autocmd')
 endif
 
 "" Buffer nav
-noremap <leader>z :bp<CR>
-noremap <leader>x :bn<CR>
-noremap <leader>q <C-w>h
-noremap <leader>w <C-w>l
+noremap <leader>q :bp<CR>
+noremap <leader>w :bn<CR>
+noremap <leader>z <C-w>h
+noremap <leader>x <C-w>l
 
 "" Close buffer
 noremap <leader>c :bd<CR>
@@ -365,6 +376,9 @@ augroup vimrc-javascript
   autocmd FileType javascript setl tabstop=2|setl shiftwidth=2|setl expandtab softtabstop=2 colorcolumn=120
 augroup END
 
+" sort import javascript
+let g:import_sort_auto = 1
+
 " python
 " vim-python
 augroup vimrc-python
@@ -373,6 +387,9 @@ augroup vimrc-python
       \ formatoptions+=croq softtabstop=4
       \ cinwords=if,elif,else,for,while,try,except,finally,def,class,with
 augroup END
+
+let g:python_host_prog  = '/usr/bin/python2.7'
+let g:python3_host_prog ='/usr/bin/python3.8'
 
 " jedi-vim
 let g:jedi#popup_on_dot = 0
@@ -388,15 +405,41 @@ let g:jedi#smart_auto_mappings = 0
 " vim-airline
 let g:airline#extensions#virtualenv#enabled = 1
 
-" ale
-:call extend(g:ale_linters, {
-    \'python': ['flake8'], })
+let js_fixers = ['prettier', 'eslint']
 
 let g:ale_fixers = {
-  \   'python': [
-  \       'autopep8',
-  \   ],
-  \}
+ \ '*': ['remove_trailing_lines', 'trim_whitespace'],
+ \ }
+
+" ale
+let g:ale_linters = { 
+            \'python': ['flake8'],
+            \ 'typescript': ['eslint', 'deno', 'standard', 'tslint', 'tsserver', 'typecheck', 'xo'],
+            \ 'typescriptreact': ['eslint', 'deno', 'standard', 'tslint', 'tsserver', 'typecheck', 'xo'],
+            \ }
+let g:ale_fixers = {
+  \ 'python': [
+  \    'autopep8',
+  \    'isort',
+  \ ],
+  \ 'javascript': js_fixers,
+  \ 'javascript.jsx': js_fixers,
+  \ 'typescript': js_fixers,
+  \ 'typescriptreact': js_fixers,
+  \ 'css': ['prettier'],
+  \ 'json': ['prettier'],
+  \ 'yaml': ['prettier'],
+  \ 'sql': ['pgformatter'],
+  \ }
+let g:ale_fix_on_save = 1
+let g:ale_python_flake8_options = '--max-line-length=120'
+let g:ale_python_autopep8_options = '--max-line-length=120'
+
+" sql
+let g:ale_sql_pgformatter_options = '-b'
+
+" typescript
+let g:ale_typescript_standard_executable = 'ts-standard' 
 
 " Syntax highlight
 let python_highlight_all = 1
