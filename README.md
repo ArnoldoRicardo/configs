@@ -21,25 +21,6 @@ si hay sesión X, y elige el camino al portapapeles.
 
 Sin gestor de plugins: arranca igual de rápido por ssh que en local.
 
-## chrome-cdp
-
-Chrome ya logueado (copia del perfil real) con DevTools Protocol, para automatizarlo con
-Playwright/OMP/Claude Code. Chrome corre en think-x1 y cyxpc-b lo ve en su propio
-`127.0.0.1:9222` por un túnel `ssh -R` que se reconecta solo.
-
-La carpeta es a la vez el skill de Claude Code (`SKILL.md`) y el comando (`chrome-debug`,
-bash). El mismo script sirve en las dos máquinas: si hay Chrome hace de servidor (levanta
-Chrome + túnel como unidades `systemd --user`), si no, de cliente (diagnostica y lo arregla
-en think-x1 por ssh). `chrome-debug status` dice qué falla; `chrome-debug --help`, el resto.
-
-Instalar (think-x1 y cyxpc-b), con el repo clonado en `~/dev/configs`:
-
-    ln -sfn ~/dev/configs/chrome-cdp ~/.claude/skills/chrome-cdp
-    ln -sf  ~/dev/configs/chrome-cdp/chrome-debug ~/.local/bin/chrome-debug
-
-Si la pantalla de think-x1 se bloquea, Chrome se congela hasta desbloquearla (light-locker
-cambia de VT y Xorg deja de atender la sesión).
-
 ## init.vim (legacy)
 
 Config de Neovim generada con vim-bootstrap en 2021. Ya no la uso, se queda por historia.
